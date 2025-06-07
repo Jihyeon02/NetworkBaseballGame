@@ -1,0 +1,39 @@
+# 🚫 Git에서 제외할 파일들
+
+# 컴파일된 바이너리 파일
+baseball_server
+baseball_client
+*.o
+*.exe
+
+# 디버그 심볼 파일 (macOS)
+*.dSYM/
+
+# 시연 및 데모 파일들 (별도 관리)
+demo_*
+
+# 빈 파일들
+run_game*.sh
+client.c
+
+# 이전 프로젝트 파일들 (RTS 게임)
+game_logic.*
+protocol.h
+server.c
+
+# IDE 설정 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 임시 파일
+*.tmp
+*.bak
+*~
+
+# 로그 파일
+*.log
+
+# 계획 문서 (별도 관리)
+README_PLAN.md 
