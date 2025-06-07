@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "Mac (arm64)",
+
+            // ⚠️ M4(Apple Silicon) 환경이므로 아래와 같이 설정
+            "includePath": [
+                "${workspaceFolder}",        // 프로젝트 최상위 폴더 (protocol.h, game_logic.h 포함)
+                "/opt/homebrew/include",    // Homebrew로 설치된 라이브러리 헤더(json-c 등)
+            ],
+            "defines": [],
+
+            // macOS 시스템 프레임워크 경로
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+
+            // M4 환경에서는 기본 clang을 사용합니다.
+            "compilerPath": "/usr/bin/clang",
+
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+
+            // 중요한 부분: M4(Apple Silicon)이니 intel(x64)가 아닌 arm64 모드로 지정
+            "intelliSenseMode": "macos-clang-arm64",
+
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/opt/homebrew/include"
+
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}
+
