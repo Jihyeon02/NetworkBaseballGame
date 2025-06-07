@@ -215,20 +215,36 @@ void print_player_status(int player_id, const char* status) {
  */
 void print_game_rules() {
     printf("╭─────────────────────────────────────────────────────────────╮\n");
-    printf("│  📋 게임 규칙 & 명령어                                         │\n");
+    printf("│  📋 숫자야구 게임 완전 가이드 📋                              │\n");
     printf("├─────────────────────────────────────────────────────────────┤\n");
     printf("│                                                             │\n");
-    printf("│  🎯 목표: 상대방의 3자리 숫자를 먼저 맞추면 승리!               │\n");
+    printf("│  🎯 게임 목표:                                               │\n");
+    printf("│     상대방보다 먼저 3자리 비밀번호를 맞추면 승리!              │\n");
     printf("│                                                             │\n");
-    printf("│  📊 결과 해석:                                               │\n");
+    printf("│  📝 게임 순서:                                               │\n");
+    printf("│     1️⃣ 각자 3자리 서로 다른 숫자 설정 (예: 123, 456)         │\n");
+    printf("│     2️⃣ 번갈아가며 상대방 숫자 추측                           │\n");
+    printf("│     3️⃣ 결과 확인 후 다음 추측 진행                           │\n");
+    printf("│     4️⃣ 3 스트라이크 먼저 내는 사람이 승리!                   │\n");
+    printf("│                                                             │\n");
+    printf("│  📊 결과 해석 (중요!):                                       │\n");
     printf("│     ⚡ 스트라이크: 숫자와 위치가 모두 정확                     │\n");
+    printf("│        예) 정답 123, 추측 120 → 1, 2가 정확한 위치 = 2S     │\n");
     printf("│     🔮 볼: 숫자는 맞지만 위치가 틀림                          │\n");
+    printf("│        예) 정답 123, 추측 321 → 모든 숫자 있지만 위치 틀림 = 3B │\n");
+    printf("│     💫 아웃: 맞는 숫자가 하나도 없음                          │\n");
+    printf("│        예) 정답 123, 추측 456 → 공통 숫자 없음 = 0S 0B      │\n");
     printf("│                                                             │\n");
-    printf("│  💻 명령어:                                                  │\n");
-    printf("│     🔹 set <3자리숫자>    - 내 숫자 설정 (예: set 123)       │\n");
-    printf("│     🔹 guess <3자리숫자>  - 상대방 숫자 추측 (예: guess 456) │\n");
-    printf("│     🔹 help              - 도움말 다시 보기                 │\n");
-    printf("│     🔹 quit              - 게임 종료                       │\n");
+    printf("│  💻 사용 명령어:                                             │\n");
+    printf("│     🔹 set 123     - 내 비밀번호 설정 (서로 다른 3자리)       │\n");
+    printf("│     🔹 guess 456   - 상대방 번호 추측 (내 턴일 때만)          │\n");
+    printf("│     🔹 help        - 이 도움말 다시 보기                     │\n");
+    printf("│     🔹 quit        - 게임 종료하고 나가기                     │\n");
+    printf("│                                                             │\n");
+    printf("│  ⚠️  주의사항:                                               │\n");
+    printf("│     • 같은 숫자 중복 사용 금지! (111, 223 등 불가)            │\n");
+    printf("│     • 0으로 시작하는 숫자 가능 (012, 034 등 가능)             │\n");
+    printf("│     • 턴제 게임이므로 상대방 턴에는 대기해야 함               │\n");
     printf("│                                                             │\n");
     printf("╰─────────────────────────────────────────────────────────────╯\n");
     printf("\n");
@@ -287,10 +303,14 @@ void print_turn_indicator(int is_my_turn) {
  * @param strikes: 스트라이크 개수
  * @param balls: 볼 개수
  * @param attempts: 현재까지 시도 횟수
+ * @param current_player: 현재 추측한 플레이어 ID
  */
-void print_result_board(const char* guess, int strikes, int balls, int attempts) {
+void print_result_board(const char* guess, int strikes, int balls, int attempts, int current_player) {
+    // 플레이어 구분 표시
+    const char* player_name = (current_player == my_player_id) ? "🟢 당신" : "🔴 상대방";
+    
     printf("╭─────────────────────────────────────────────────────────────╮\n");
-    printf("│  📊 추측 결과 - GUESS RESULT 📊                              │\n");
+    printf("│  📊 %s의 추측 결과 - GUESS RESULT 📊                        │\n", player_name);
     printf("├─────────────────────────────────────────────────────────────┤\n");
     printf("│                                                             │\n");
     printf("│  🎯 추측한 숫자: %s                                          │\n", guess);
@@ -309,12 +329,17 @@ void print_result_board(const char* guess, int strikes, int balls, int attempts)
     printf("                              │\n");
     
     printf("│                                                             │\n");
-    printf("│  📈 시도 횟수: %d번                                          │\n", attempts);
+    printf("│  📈 %s 시도 횟수: %d번                                      │\n", 
+           (current_player == my_player_id) ? "당신의" : "상대방", attempts);
     printf("│                                                             │\n");
     
     // 정답인 경우 축하 메시지
     if (strikes == 3) {
-        printf("│  🎊🎊🎊 축하합니다! 정답입니다! 🎊🎊🎊                    │\n");
+        if (current_player == my_player_id) {
+            printf("│  🎊🎊🎊 축하합니다! 당신이 정답을 맞췄습니다! 🎊🎊🎊         │\n");
+        } else {
+            printf("│  😢😢😢 아쉽게도 상대방이 정답을 맞췄습니다... 😢😢😢        │\n");
+        }
     }
     
     printf("╰─────────────────────────────────────────────────────────────╯\n");
@@ -533,19 +558,21 @@ int handle_server_message(int sockfd) {
     
     // 추측 결과
     else if (strcmp(action, ACTION_GUESS_RESULT) == 0) {
-        struct json_object *jguess = NULL, *jstrikes = NULL, *jballs = NULL, *jattempts = NULL;
+        struct json_object *jguess = NULL, *jstrikes = NULL, *jballs = NULL, *jattempts = NULL, *jcurrent_player = NULL;
         
         if (json_object_object_get_ex(jmsg, "guess", &jguess) &&
             json_object_object_get_ex(jmsg, "strikes", &jstrikes) &&
             json_object_object_get_ex(jmsg, "balls", &jballs) &&
-            json_object_object_get_ex(jmsg, "attempts", &jattempts)) {
+            json_object_object_get_ex(jmsg, "attempts", &jattempts) &&
+            json_object_object_get_ex(jmsg, "current_player", &jcurrent_player)) {
             
             const char *guess = json_object_get_string(jguess);
             int strikes = json_object_get_int(jstrikes);
             int balls = json_object_get_int(jballs);
             int attempts = json_object_get_int(jattempts);
+            int current_player = json_object_get_int(jcurrent_player);
             
-            print_result_board(guess, strikes, balls, attempts);
+            print_result_board(guess, strikes, balls, attempts, current_player);
         }
     }
     

@@ -591,6 +591,7 @@ void handle_client_message(int player_id, fd_set *master_set) {
                 json_object_object_add(jresult, "strikes", json_object_new_int(result.strikes));
                 json_object_object_add(jresult, "balls", json_object_new_int(result.balls));
                 json_object_object_add(jresult, "attempts", json_object_new_int(game.players[player_id].attempts));
+                json_object_object_add(jresult, "current_player", json_object_new_int(player_id));
                 
                 // 양쪽 플레이어에게 결과 전송
                 broadcast_to_all(jresult);
