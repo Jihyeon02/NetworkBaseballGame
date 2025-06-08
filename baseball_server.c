@@ -433,6 +433,25 @@ void end_game(int winner_id) {
     }
     
     printf("[Server] 게임 종료! 플레이어 %d 승리\n", winner_id);
+    
+    // 5초 후 게임 상태를 대기 상태로 초기화
+    printf("[Server] 5초 후 새 게임 준비...\n");
+    sleep(5);
+    
+    // 게임 상태 초기화 (플레이어 연결은 유지)
+    game.state = GAME_WAITING;
+    game.current_turn = 0;
+    
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (game.players[i].connected) {
+            game.players[i].state = PLAYER_WAITING;
+            memset(game.players[i].secret_number, 0, 4);
+            game.players[i].attempts = 0;
+            game.players[i].is_winner = 0;
+        }
+    }
+    
+    printf("[Server] 새 게임 준비 완료 - 플레이어들이 새 게임을 시작할 수 있습니다!\n");
 }
 
 // ──────────────────────────────────────────────────────────
@@ -458,10 +477,20 @@ void handle_new_connection(int listen_fd) {
     }
     
     if (player_id < 0) {
-        // 서버 가득 참
-        struct json_object *jerr = create_error("서버가 가득 찼습니다. 나중에 다시 시도해주세요.");
-        send_json(conn_fd, jerr);
-        json_object_put(jerr);
+        // 현재 게임이 진행 중이라면 정중하게 알림
+        if (game.state == GAME_PLAYING || game.state == GAME_SETTING) {
+            struct json_object *jerr = create_error("현재 게임이 진행 중입니다. 잠시 후 다시 시도해주세요.");
+            send_json(conn_fd, jerr);
+            json_object_put(jerr);
+            printf("[Server] 게임 진행 중 - 새 플레이어 연결 거부 (IP: %s)\n", 
+                   inet_ntoa(cli_addr.sin_addr));
+        } else {
+            struct json_object *jerr = create_error("서버에 접속할 수 없습니다. 나중에 다시 시도해주세요.");
+            send_json(conn_fd, jerr);
+            json_object_put(jerr);
+            printf("[Server] 서버 용량 초과 - 연결 거부 (IP: %s)\n", 
+                   inet_ntoa(cli_addr.sin_addr));
+        }
         close(conn_fd);
         return;
     }
